@@ -1,0 +1,26 @@
+__DEVICE__ float3 transform ( int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B ) {
+
+DEFINE_UI_PARAMS(m0, 0, DCTLUI_VALUE_BOX, 1)
+DEFINE_UI_PARAMS(m1, 1, DCTLUI_VALUE_BOX, 0)
+DEFINE_UI_PARAMS(m2, 2, DCTLUI_VALUE_BOX, 0)
+
+DEFINE_UI_PARAMS(m3, 3, DCTLUI_VALUE_BOX, 0)
+DEFINE_UI_PARAMS(m4, 4, DCTLUI_VALUE_BOX, 1)
+DEFINE_UI_PARAMS(m5, 5, DCTLUI_VALUE_BOX, 0)
+
+DEFINE_UI_PARAMS(m6, 6, DCTLUI_VALUE_BOX, 0)
+DEFINE_UI_PARAMS(m7, 7, DCTLUI_VALUE_BOX, 0)
+DEFINE_UI_PARAMS(m8, 8, DCTLUI_VALUE_BOX, 1)
+
+float3 pixel;
+
+float matrix[9] = { m0, m1, m2,
+                    m3, m4, m5,
+                    m6, m7, m8 };
+
+pixel.x = matrix[0] * p_R + matrix[1] * p_G + matrix[2] * p_B;
+pixel.y = matrix[3] * p_R + matrix[4] * p_G + matrix[5] * p_B;
+pixel.z = matrix[6] * p_R + matrix[7] * p_G + matrix[8] * p_B;
+
+return pixel;
+}

@@ -1,0 +1,11 @@
+__CONSTANT__ float sRGBtoXYZ[9] = { 0.4124564,  0.3575761,  0.1804375,
+                                    0.2126729,  0.7151522,  0.0721750,
+                                    0.0193339,  0.1191920,  0.9503041 };
+
+__DEVICE__ float3 transform ( int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B ) {
+float3 pixel;
+pixel.x = sRGBtoXYZ[0] * p_R + sRGBtoXYZ[1] * p_G + sRGBtoXYZ[2] * p_B;
+pixel.y = sRGBtoXYZ[3] * p_R + sRGBtoXYZ[4] * p_G + sRGBtoXYZ[5] * p_B;
+pixel.z = sRGBtoXYZ[6] * p_R + sRGBtoXYZ[7] * p_G + sRGBtoXYZ[8] * p_B;
+return pixel;
+}

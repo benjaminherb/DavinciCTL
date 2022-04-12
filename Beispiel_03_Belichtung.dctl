@@ -1,0 +1,64 @@
+__DEVICE__ float srgbToLinear(float x){
+return ((x > 0.04045) * _powf(_fdivide((x+0.055),1.055), 2.4)) + (x<=0.04045) * _fdivide(x, 12.92);
+}
+
+__DEVICE__ float linearToSrgb (float x){
+return ((x > 0.0031308) * 1.055 * (_powf(x,_fdivide(1, 2.4)) - 0.055) + (x <= 0.0031308) * 12.92 * x);
+}
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B){
+
+  // Initialize Varibles
+  int p_Length;
+  int p_Pos;
+  char current_pixel;
+  float red;
+  float green;
+  float blue;
+
+  // UI
+  DEFINE_UI_PARAMS(split_position, Split Position, DCTLUI_SLIDER_FLOAT, 0.5, 0.0, 1.0, 0.02)
+  DEFINE_UI_PARAMS(dir, Split Direction, DCTLUI_COMBO_BOX, 1, { h, v }, { Horizontal, Vertical })
+
+  DEFINE_UI_PARAMS(exposure_log, Log Exposure + , DCTLUI_SLIDER_FLOAT, 0.0, -10.0, 10.0, 0.1)
+  DEFINE_UI_PARAMS(show_log,  Show Log, DCTLUI_CHECK_BOX, 0)
+  DEFINE_UI_PARAMS(exposure_srgb, sRGB Exposure * , DCTLUI_SLIDER_FLOAT, 1.0, 0.0, 10.0, 0.1)
+  DEFINE_UI_PARAMS(show_srgb, Show sRGB, DCTLUI_CHECK_BOX, 1)
+  DEFINE_UI_PARAMS(exposure_lin, Linear Exposure *, DCTLUI_SLIDER_FLOAT, 1.0, 0.0, 20.0, 0.1)
+  DEFINE_UI_PARAMS(show_lin,  Show Linear, DCTLUI_CHECK_BOX, 0)
+
+  // Choose variables based on the direction
+  if (dir == h) {
+  p_Length = p_Height;
+  p_Pos = p_Y;
+  } else {
+  p_Length = p_Width;
+  p_Pos = p_X;
+  }
+
+  float diff = (split_position * p_Length) - (_fdivide(p_Length, 2.0));   // Calculate offset from the split
+  int split = show_lin + show_srgb + show_log;   // How many splits?
+
+  // Check in which part the pixel is in
+  if      (show_log && p_Pos < _fdivide(p_Length, split) + (max(show_lin,show_srgb) * diff)) {current_pixel = 'g';}
+  else if (show_srgb && p_Pos < _fdivide(p_Length, split) * (show_log + show_srgb) + (show_lin * diff)) {current_pixel = 's';}
+  else if (show_lin) {current_pixel = 'l';}
+  else { return make_float3(0,0,0);} // returns black
+
+  // Calculate pixel value based on the location
+  if (current_pixel == 'l') {
+    red   = linearToSrgb(srgbToLinear(p_R) * exposure_lin);
+    green = linearToSrgb(srgbToLinear(p_G) * exposure_lin);
+    blue  = linearToSrgb(srgbToLinear(p_B) * exposure_lin);
+  } else if (current_pixel == 'g') {
+    red   = linearToSrgb(_powf(2, _log2f(srgbToLinear(p_R)) + exposure_log));
+    green = linearToSrgb(_powf(2, _log2f(srgbToLinear(p_G)) + exposure_log));
+    blue  = linearToSrgb(_powf(2, _log2f(srgbToLinear(p_B)) + exposure_log));
+  } else if (current_pixel == 's') {
+    red   = p_R * exposure_srgb;
+    green = p_G * exposure_srgb;
+    blue  = p_B * exposure_srgb;
+  }
+
+  return make_float3(red, green, blue);
+}

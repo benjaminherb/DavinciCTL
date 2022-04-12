@@ -1,0 +1,6 @@
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+  float red   = p_R * 0.7 ;
+  float green = p_G * 0.9 ;
+  float blue  = p_B * 1.2 ;
+  return make_float3(red, green, blue);
+}
